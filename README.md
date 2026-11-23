@@ -1,31 +1,134 @@
-# Forca & Termo - Desktop Application
+# Forca Dev
 
-Aplicação desktop desenvolvida em Python utilizando a biblioteca Tkinter, estruturada com conceitos de Orientação a Objetos (POO). O projeto evolui o tradicional jogo de terminal para uma interface gráfica moderna, responsiva e com suporte a múltiplos modos de jogo.
+Jogo da forca com termos de programação. O jogador informa um apelido, o servidor sorteia uma palavra secreta guardada no SQLite e o jogador chuta letras. Com 6 erros, perde; revelando a palavra, vence, ganha pontos e entra no ranking.
 
-## Arquitetura e Funcionalidades
+A palavra secreta **nunca sai do servidor** enquanto a partida está em andamento: o front recebe só a máscara (ex.: `PR_M_SE`).
 
-* **Interface Gráfica (GUI) Nativa:** Desenvolvida inteiramente com Tkinter, utilizando um padrão visual *dark mode* baseado na paleta Dracula.
-* **Mecannicas de Jogo Avançadas:**
-  * **Sincronização de Entrada:** Captura de eventos via teclado físico e teclado virtual interativo na tela.
-  * **Sistema de Dificuldades:** Parâmetros dinâmicos para Fácil (com dicas textuais e 6 tentativas), Médio (sem dicas) e Difícil (4 tentativas e renderização acelerada de erros).
-  * **Sistema de Pontuação e Streak:** Cálculo de pontuação baseado na dificuldade selecionada e no encadeamento de vitórias consecutivas.
-  * **Feedback Visual e Tátil:** Implementação de pop-ups modulares customizados e efeito de deslocamento lateral da janela (*screen shake*) em caso de erro.
-* **Minigame Integrado (TERMO):** Módulo secundário baseado em arquitetura de janelas modulares (`Toplevel`), replicando a dinâmica de adivinhação de palavras com validação cromática de posições.
+![Partida em andamento no Forca Dev](docs/img/tela-jogo.webp)
 
-## Estrutura do Código
+| Tela inicial | Fim de jogo | Celular |
+|---|---|---|
+| ![Tela inicial com apelido, dificuldade e ranking](docs/img/tela-inicial.webp) | ![Tela de vitória com estrelas e pontos](docs/img/tela-fim.webp) | ![Partida no celular](docs/img/tela-celular.webp) |
 
-O projeto está estruturado em classes principais para garantir modularidade e clareza:
-* `JogoDaForcaMaster`: Controla o fluxo principal do jogo, gerenciamento de estado, renderização do Canvas e interações com o teclado.
-* `JogoTermo`: Controla a lógica isolada do minigame de adivinhação de termos, matrizes de validação e feedback de letras.
+## O que tem no jogo
 
-## Requisitos de Execução
+- **Cenário animado em SVG:** céu noturno com estrelas, lua, morros e a forca de madeira. A cada erro aparece uma parte do boneco, e o rosto dele muda de humor conforme as vidas acabam. Na derrota ele balança; na vitória sai da forca comemorando.
+- **Palavra em peças** que viram quando a letra é revelada. No fim, as letras que faltaram aparecem em rosa.
+- **Teclado com relevo** (layout QWERTY): verde no acerto, rosa e riscado no erro. Também dá para jogar pelo teclado do computador.
+- **HUD da partida:** avatar do jogador, categoria, corações que quebram, bônus de vidas, cronômetro e botão de som.
+- **Reações a cada palpite:** o palco treme no erro, aparecem "Boa!" e "−1 ♥" flutuando, e um selo de combo para acertos seguidos.
+- **Efeitos sonoros** gerados pelo próprio navegador (Web Audio API), sem arquivos de áudio. Dá para desligar e a escolha fica salva.
+- **Fim de jogo:** até 3 estrelas pela quantidade de vidas, pontos subindo, confete na vitória e a sua posição no ranking.
+- **Ranking** com medalhas de ouro, prata e bronze e destaque para a partida que acabou de terminar.
+- **Dica paga** (custa 1 vida) e **níveis de dificuldade** (Surpresa, Fácil, Médio, Difícil).
+- Funciona no celular e respeita a opção do sistema de reduzir animações.
 
-O projeto utiliza exclusivamente bibliotecas nativas da biblioteca padrão do Python, dispensando o uso de gerenciadores de pacotes externos (`pip`).
+## Tecnologias
 
-* **Dependência:** Python 3.8 ou superior.
+| Parte     | Tecnologias |
+|-----------|-------------|
+| Back-end  | Node.js, TypeScript (strict), Fastify 5, Zod 4, Prisma ORM 6.19.3, SQLite, Vitest |
+| Front-end | React 19, TypeScript (strict), Vite, SVG + CSS para as animações, Web Audio API para os sons |
 
-## Execução via Linha de Comando
+Bônus implementados: teclado físico, desenho da forca em SVG, dica paga (`POST /api/partidas/:id/dica`) e níveis de dificuldade.
 
-1. Clone o repositório para sua máquina local:
-   ```bash
-   git clone [https://github.com/SEU_USUARIO/nome-do-repositorio.git](https://github.com/SEU_USUARIO/nome-do-repositorio.git)
+## Pré-requisitos
+
+- **Node.js 20.19+ ou 22.12+** (confira com `node -v`)
+- npm (vem com o Node)
+- Git
+
+## Como rodar
+
+São dois terminais: um para o back-end (porta 3333) e outro para o front-end (porta 5173).
+
+### 1. Back-end
+
+```bash
+cd backend
+npm install
+cp .env.example .env          # no Windows (cmd): copy .env.example .env
+npx prisma migrate dev        # cria prisma/forca.db, aplica a migration e gera o Prisma Client
+npm run seed                  # cadastra as 34 palavras
+npm run dev                   # API em http://localhost:3333
+```
+
+Teste rápido: abra http://localhost:3333/api/ranking no navegador, que deve mostrar `[]`.
+
+### 2. Front-end (em outro terminal)
+
+```bash
+cd frontend
+npm install
+npm run dev                   # abre em http://localhost:5173
+```
+
+O Vite repassa as chamadas `/api/...` para `http://localhost:3333` (proxy em `vite.config.ts`), então o back-end precisa estar rodando.
+
+## Testes
+
+```bash
+cd backend
+npm test
+```
+
+São 38 testes no Vitest:
+
+- `tests/regras.test.ts`: as regras do jogo como funções puras (RN01 a RN06 e bônus).
+- `tests/api.test.ts`: as rotas, com `app.inject` do Fastify (status, formato `{ erro }`, vitória, derrota, ranking).
+
+Os testes usam um banco separado (`prisma/test.db`, criado automaticamente por `tests/setup-banco.ts`), então o `forca.db` do jogo não é apagado.
+
+## Scripts úteis
+
+| Pasta      | Comando             | O que faz |
+|------------|---------------------|-----------|
+| `backend`  | `npm run dev`       | API com recarga automática (tsx watch) |
+| `backend`  | `npm run seed`      | Cadastra/atualiza as palavras (pode rodar de novo sem duplicar) |
+| `backend`  | `npm test`          | Roda os testes |
+| `backend`  | `npm run typecheck` | Checa os tipos do TypeScript |
+| `backend`  | `npm run db:studio` | Abre o Prisma Studio para ver os dados |
+| `frontend` | `npm run build`     | Checa os tipos e gera a versão de produção |
+
+## Estrutura
+
+```
+forca-dev/
+├── backend/
+│   ├── prisma/            schema.prisma e migrations/
+│   ├── src/
+│   │   ├── database/      prisma.ts (PrismaClient único) e seed.ts
+│   │   ├── game/          regras.ts (funções puras)
+│   │   ├── repositories/  acesso ao banco (Prisma)
+│   │   ├── services/      regras + banco: monta a resposta da API
+│   │   ├── controllers/   validam a entrada (Zod) e chamam o service
+│   │   ├── routes/        plugin Fastify com as rotas
+│   │   ├── schemas/       schemas Zod
+│   │   └── app.ts         criarApp() + setErrorHandler
+│   └── tests/
+├── frontend/src/
+│   ├── api/               cliente tipado da API
+│   ├── components/        Cenario, Mascara, Teclado, Hud, Vidas, Ranking, Estrelas, Confete, …
+│   ├── hooks/             useRanking, useFeedback, useCronometro, useContagem
+│   ├── lib/               jogo.ts (funções auxiliares) e som.ts (efeitos sonoros)
+│   ├── pages/             TelaInicial, TelaJogo, TelaFim
+│   └── App.tsx
+└── docs/                  planejamento, API, decisões e diário de bordo
+```
+
+## Documentação
+
+- [Planejamento](docs/planejamento.md)
+- [API: rotas, exemplos e erros](docs/api.md)
+- [Decisões técnicas](docs/decisoes.md)
+- [Diário de bordo](docs/diario-de-bordo.md)
+
+## Problemas comuns
+
+| Sintoma | Solução |
+|---------|---------|
+| `Environment variable not found: DATABASE_URL` | Falta o `.env` na pasta `backend`: copie do `.env.example`. |
+| `@prisma/client did not initialize yet` | Rode `npx prisma generate` (ou `npx prisma migrate dev`). |
+| `The table main.palavras does not exist` | Rode `npx prisma migrate dev`. |
+| Front mostra "Servidor fora do ar" | O back-end não está rodando: `npm run dev` na pasta `backend`. |
+| "Nenhuma palavra cadastrada" ao jogar | Rode `npm run seed` na pasta `backend`. |

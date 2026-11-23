@@ -1,0 +1,37 @@
+// Prisma ORM 6.19.3 + SQLite
+// Depois de mudar este arquivo: npx prisma migrate dev --name descricao-da-mudanca
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Palavra {
+  id        Int       @id @default(autoincrement())
+  texto     String    @unique // sempre em MAIÚSCULAS, sem acento, espaço ou hífen
+  categoria String
+  dica      String? // bônus: revelada por POST /api/partidas/:id/dica
+  partidas  Partida[]
+
+  @@map("palavras")
+}
+
+model Partida {
+  id             Int       @id @default(autoincrement())
+  jogador        String
+  palavraId      Int       @map("palavra_id")
+  palavra        Palavra   @relation(fields: [palavraId], references: [id])
+  letrasTentadas String    @default("") @map("letras_tentadas") // ex.: "EPRSMA"
+  erros          Int       @default(0) // vidas restantes = 6 - erros
+  status         String    @default("em_andamento") // em_andamento | vitoria | derrota
+  pontos         Int       @default(0)
+  dicaUsada      Boolean   @default(false) @map("dica_usada")
+  criadaEm       DateTime  @default(now()) @map("criada_em")
+  finalizadaEm   DateTime? @map("finalizada_em")
+
+  @@map("partidas")
+}
