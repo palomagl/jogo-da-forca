@@ -1,134 +1,117 @@
-# Forca Dev
+<h1 align="center">FORCA DEV</h1>
 
-Jogo da forca com termos de programação. O jogador informa um apelido, o servidor sorteia uma palavra secreta guardada no SQLite e o jogador chuta letras. Com 6 erros, perde; revelando a palavra, vence, ganha pontos e entra no ranking.
+<p align="center">
+  <strong>Adivinhe o termo de programação antes que o dev vá para a forca.</strong>
+</p>
 
-A palavra secreta **nunca sai do servidor** enquanto a partida está em andamento: o front recebe só a máscara (ex.: `PR_M_SE`).
+<p align="center">
+  Um jogo da forca com desafios de programação, partidas animadas e ranking de jogadores.
+</p>
 
-![Partida em andamento no Forca Dev](docs/img/tela-jogo.webp)
+<p align="center">
+  <img src="docs/img/tela-jogo.webp" alt="Partida real do Forca Dev, com cenário animado, palavra secreta e teclado" width="900">
+</p>
 
-| Tela inicial | Fim de jogo | Celular |
-|---|---|---|
-| ![Tela inicial com apelido, dificuldade e ranking](docs/img/tela-inicial.webp) | ![Tela de vitória com estrelas e pontos](docs/img/tela-fim.webp) | ![Partida no celular](docs/img/tela-celular.webp) |
+## O que é o Forca Dev?
 
-## O que tem no jogo
+O **Forca Dev** é uma versão do clássico jogo da forca feita para quem gosta de tecnologia. Em vez de palavras aleatórias, você tenta descobrir **termos do universo da programação**.
 
-- **Cenário animado em SVG:** céu noturno com estrelas, lua, morros e a forca de madeira. A cada erro aparece uma parte do boneco, e o rosto dele muda de humor conforme as vidas acabam. Na derrota ele balança; na vitória sai da forca comemorando.
-- **Palavra em peças** que viram quando a letra é revelada. No fim, as letras que faltaram aparecem em rosa.
-- **Teclado com relevo** (layout QWERTY): verde no acerto, rosa e riscado no erro. Também dá para jogar pelo teclado do computador.
-- **HUD da partida:** avatar do jogador, categoria, corações que quebram, bônus de vidas, cronômetro e botão de som.
-- **Reações a cada palpite:** o palco treme no erro, aparecem "Boa!" e "−1 ♥" flutuando, e um selo de combo para acertos seguidos.
-- **Efeitos sonoros** gerados pelo próprio navegador (Web Audio API), sem arquivos de áudio. Dá para desligar e a escolha fica salva.
-- **Fim de jogo:** até 3 estrelas pela quantidade de vidas, pontos subindo, confete na vitória e a sua posição no ranking.
-- **Ranking** com medalhas de ouro, prata e bronze e destaque para a partida que acabou de terminar.
-- **Dica paga** (custa 1 vida) e **níveis de dificuldade** (Surpresa, Fácil, Médio, Difícil).
-- Funciona no celular e respeita a opção do sistema de reduzir animações.
+Escolha um apelido, selecione a dificuldade e comece a adivinhar. Cada letra errada custa uma vida. Acerte a palavra para ganhar pontos e disputar uma posição no ranking.
 
-## Tecnologias
+### O que você encontra no jogo
 
-| Parte     | Tecnologias |
-|-----------|-------------|
-| Back-end  | Node.js, TypeScript (strict), Fastify 5, Zod 4, Prisma ORM 6.19.3, SQLite, Vitest |
-| Front-end | React 19, TypeScript (strict), Vite, SVG + CSS para as animações, Web Audio API para os sons |
+- **4 dificuldades:** Surpresa, Fácil, Médio e Difícil.
+- **Ranking de jogadores:** compare suas pontuações e conquiste uma posição no placar.
+- **6 vidas por partida:** pense antes de escolher cada letra.
+- **Dicas:** troque uma vida por uma pista quando precisar de ajuda.
+- **Animações e efeitos sonoros:** cenário, personagens e reações que acompanham a partida.
+- **Teclado interativo:** jogue clicando nas letras ou usando o teclado do computador.
+- **Versão responsiva:** interface adaptada para computador e celular.
 
-Bônus implementados: teclado físico, desenho da forca em SVG, dica paga (`POST /api/partidas/:id/dica`) e níveis de dificuldade.
+## Veja o jogo por dentro
 
-## Pré-requisitos
+Estas são **capturas reais do projeto**, não mockups.
 
-- **Node.js 20.19+ ou 22.12+** (confira com `node -v`)
-- npm (vem com o Node)
-- Git
+<table>
+  <tr>
+    <th align="center">Tela inicial e ranking</th>
+    <th align="center">Resultado da partida</th>
+  </tr>
+  <tr>
+    <td><img src="docs/img/tela-inicial.webp" alt="Tela inicial real com apelido, seleção de dificuldade e ranking"></td>
+    <td><img src="docs/img/tela-fim.webp" alt="Tela real de fim de jogo com pontuação"></td>
+  </tr>
+</table>
 
-## Como rodar
+<p align="center">
+  <strong>Também funciona em telas menores</strong>
+</p>
+<p align="center">
+  <img src="docs/img/tela-celular.webp" alt="Partida real do Forca Dev na versão mobile" width="260">
+</p>
 
-São dois terminais: um para o back-end (porta 3333) e outro para o front-end (porta 5173).
+## Baixar e jogar
 
-### 1. Back-end
+**[Baixar o projeto em ZIP](https://github.com/palomagl/jogo-da-forca/archive/refs/heads/main.zip)** · **[Explorar o código no GitHub](https://github.com/palomagl/jogo-da-forca)**
+
+> **Importante:** este repositório contém o **código-fonte**, não um instalador (.exe). Para jogar no seu computador, é preciso iniciar o servidor e a interface seguindo os passos abaixo.
+
+### O que precisa ter instalado
+
+- [Node.js](https://nodejs.org/) **20.19+ ou 22.12+**, com npm.
+- Um terminal (PowerShell, Prompt de Comando ou equivalente).
+
+### 1. Baixe e extraia o ZIP
+
+Abra a pasta extraída do projeto em um terminal e execute:
 
 ```bash
 cd backend
 npm install
-cp .env.example .env          # no Windows (cmd): copy .env.example .env
-npx prisma migrate dev        # cria prisma/forca.db, aplica a migration e gera o Prisma Client
-npm run seed                  # cadastra as 34 palavras
-npm run dev                   # API em http://localhost:3333
 ```
 
-Teste rápido: abra http://localhost:3333/api/ranking no navegador, que deve mostrar `[]`.
+Crie o arquivo `.env` a partir do exemplo:
 
-### 2. Front-end (em outro terminal)
+```bash
+# Windows (PowerShell)
+Copy-Item .env.example .env
+
+# macOS / Linux
+# cp .env.example .env
+```
+
+Depois, ainda na pasta `backend`:
+
+```bash
+npx prisma migrate dev
+npm run seed
+npm run dev
+```
+
+Deixe esse terminal aberto: ele mantém o servidor do jogo funcionando.
+
+### 2. Inicie o jogo
+
+Abra **outro terminal na pasta principal do projeto** e execute:
 
 ```bash
 cd frontend
 npm install
-npm run dev                   # abre em http://localhost:5173
+npm run dev
 ```
 
-O Vite repassa as chamadas `/api/...` para `http://localhost:3333` (proxy em `vite.config.ts`), então o back-end precisa estar rodando.
+Abra **http://localhost:5173** no navegador e comece a jogar.
 
-## Testes
+## Tecnologias
 
-```bash
-cd backend
-npm test
-```
+**React · TypeScript · Vite · Node.js · Fastify · Prisma · SQLite**
 
-São 38 testes no Vitest:
+O jogo tem frontend e backend separados. A palavra secreta permanece no servidor durante a partida, e o navegador recebe apenas as letras reveladas.
 
-- `tests/regras.test.ts`: as regras do jogo como funções puras (RN01 a RN06 e bônus).
-- `tests/api.test.ts`: as rotas, com `app.inject` do Fastify (status, formato `{ erro }`, vitória, derrota, ranking).
+Para quem quiser conhecer o desenvolvimento, há também a [documentação da API](docs/api.md), o [planejamento](docs/planejamento.md) e as [decisões técnicas](docs/decisoes.md).
 
-Os testes usam um banco separado (`prisma/test.db`, criado automaticamente por `tests/setup-banco.ts`), então o `forca.db` do jogo não é apagado.
+---
 
-## Scripts úteis
-
-| Pasta      | Comando             | O que faz |
-|------------|---------------------|-----------|
-| `backend`  | `npm run dev`       | API com recarga automática (tsx watch) |
-| `backend`  | `npm run seed`      | Cadastra/atualiza as palavras (pode rodar de novo sem duplicar) |
-| `backend`  | `npm test`          | Roda os testes |
-| `backend`  | `npm run typecheck` | Checa os tipos do TypeScript |
-| `backend`  | `npm run db:studio` | Abre o Prisma Studio para ver os dados |
-| `frontend` | `npm run build`     | Checa os tipos e gera a versão de produção |
-
-## Estrutura
-
-```
-forca-dev/
-├── backend/
-│   ├── prisma/            schema.prisma e migrations/
-│   ├── src/
-│   │   ├── database/      prisma.ts (PrismaClient único) e seed.ts
-│   │   ├── game/          regras.ts (funções puras)
-│   │   ├── repositories/  acesso ao banco (Prisma)
-│   │   ├── services/      regras + banco: monta a resposta da API
-│   │   ├── controllers/   validam a entrada (Zod) e chamam o service
-│   │   ├── routes/        plugin Fastify com as rotas
-│   │   ├── schemas/       schemas Zod
-│   │   └── app.ts         criarApp() + setErrorHandler
-│   └── tests/
-├── frontend/src/
-│   ├── api/               cliente tipado da API
-│   ├── components/        Cenario, Mascara, Teclado, Hud, Vidas, Ranking, Estrelas, Confete, …
-│   ├── hooks/             useRanking, useFeedback, useCronometro, useContagem
-│   ├── lib/               jogo.ts (funções auxiliares) e som.ts (efeitos sonoros)
-│   ├── pages/             TelaInicial, TelaJogo, TelaFim
-│   └── App.tsx
-└── docs/                  planejamento, API, decisões e diário de bordo
-```
-
-## Documentação
-
-- [Planejamento](docs/planejamento.md)
-- [API: rotas, exemplos e erros](docs/api.md)
-- [Decisões técnicas](docs/decisoes.md)
-- [Diário de bordo](docs/diario-de-bordo.md)
-
-## Problemas comuns
-
-| Sintoma | Solução |
-|---------|---------|
-| `Environment variable not found: DATABASE_URL` | Falta o `.env` na pasta `backend`: copie do `.env.example`. |
-| `@prisma/client did not initialize yet` | Rode `npx prisma generate` (ou `npx prisma migrate dev`). |
-| `The table main.palavras does not exist` | Rode `npx prisma migrate dev`. |
-| Front mostra "Servidor fora do ar" | O back-end não está rodando: `npm run dev` na pasta `backend`. |
-| "Nenhuma palavra cadastrada" ao jogar | Rode `npm run seed` na pasta `backend`. |
+<p align="center">
+  Desenvolvido por <a href="https://github.com/palomagl">@palomagl</a>.
+</p>
